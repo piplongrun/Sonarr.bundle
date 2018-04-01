@@ -1,0 +1,14 @@
+[
+	{
+		"id": "sonarr_url",
+		"label": "Sonarr URL",
+		"type": "text",
+		"default": "http://localhost:8989"
+	},
+	{
+		"id": "sonarr_api_key",
+		"label": "Sonarr API Key",
+		"type": "text",
+		"default": ""
+	}
+]
