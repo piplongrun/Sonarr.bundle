@@ -106,7 +106,7 @@ class SonarrAgent(Agent.TV_Shows):
 
 			for image in series['images']:
 
-				image_url = "{}/api/{}".format(Prefs['sonarr_url'].rstrip('/'), image['url'].lstrip('/'))
+				image_url = "{}/api/MediaCover/{}".format(Prefs['sonarr_url'].rstrip('/'), image['url'].split('/MediaCover/')[-1])
 				valid_names.append(image_url)
 
 				if image['coverType'] == "fanart":
