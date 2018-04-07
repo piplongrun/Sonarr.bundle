@@ -139,9 +139,9 @@ class SonarrAgent(Agent.TV_Shows):
 
 						if episode['seasonNumber'] == int(s) and episode['episodeNumber'] == int(e):
 
-							metadata.seasons[s].episodes[e].title = episode['title']
-							metadata.seasons[s].episodes[e].summary = episode['overview']
-							metadata.seasons[s].episodes[e].originally_available_at = Datetime.ParseDate(episode['airDate']).date()
+							metadata.seasons[s].episodes[e].title = episode['title'] if 'title' in episode else None
+							metadata.seasons[s].episodes[e].summary = episode['overview'] if 'overview' in episode else None
+							metadata.seasons[s].episodes[e].originally_available_at = Datetime.ParseDate(episode['airDate']).date() if 'airDate' in episode else None
 
 							break
 
