@@ -10,5 +10,17 @@
 		"label": "Sonarr API Key",
 		"type": "text",
 		"default": ""
+	},
+	{
+		"id": "sonarr_ended_collection",
+		"label": "Add ended series to an 'Ended' collection",
+		"type": "bool",
+		"default": "false"
+	},
+	{
+		"id": "sonarr_ended_collection_name",
+		"label": "Ended series collection name",
+		"type": "text",
+		"default": "Ended"
 	}
 ]
