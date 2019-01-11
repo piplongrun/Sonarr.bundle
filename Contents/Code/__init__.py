@@ -83,38 +83,40 @@ class SonarrAgent(Agent.TV_Shows):
 
 		for series in json_series:
 
-			if str(series['tvdbId']) != metadata.id:
+			if 'tvdbId' not in series or str(series['tvdbId']) != metadata.id:
 				continue
 
 			# For now
-			if series['seriesType'] != "standard":
+			if 'seriesType' not in series or series['seriesType'] != "standard":
 				continue
 
 			# Start adding metadata
-			metadata.title = series['title']
-			metadata.originally_available_at = Datetime.ParseDate(series['firstAired']).date()
-			metadata.summary = series['overview']
-			metadata.duration = series['runtime'] * 60 * 1000
-			metadata.studio = series['network']
+			metadata.title = series['title'] if 'title' in series else None
+			metadata.originally_available_at = Datetime.ParseDate(series['firstAired']).date() if 'firstAired' in series else None
+			metadata.summary = series['overview'] if 'overview' in series else None
+			metadata.duration = series['runtime'] * 60 * 1000  if 'runtime' in series else None
+			metadata.studio = series['network'] if 'network' in series else None
 			metadata.content_rating = series['certification'] if 'certification' in series else None
 
 			metadata.genres.clear()
-			for genre in series['genres']:
-				metadata.genres.add(genre)
+			if 'genres' in series:
+				for genre in series['genres']:
+					metadata.genres.add(genre)
 
 			valid_names = list()
 
-			for image in series['images']:
+			if 'images' in series:
+				for image in series['images']:
 
-				image_url = "{}/api/MediaCover/{}".format(Prefs['sonarr_url'].rstrip('/'), image['url'].split('/MediaCover/')[-1])
-				valid_names.append(image_url)
+					image_url = "{}/api/MediaCover/{}".format(Prefs['sonarr_url'].rstrip('/'), image['url'].split('/MediaCover/')[-1])
+					valid_names.append(image_url)
 
-				if image['coverType'] == "fanart":
-					metadata.art[image_url] = Proxy.Media(GetApiData(image_url))
-				elif image['coverType'] == "poster":
-					metadata.posters[image_url] = Proxy.Media(GetApiData(image_url))
-				elif image['coverType'] == "banner":
-					metadata.banners[image_url] = Proxy.Media(GetApiData(image_url))
+					if image['coverType'] == "fanart":
+						metadata.art[image_url] = Proxy.Media(GetApiData(image_url))
+					elif image['coverType'] == "poster":
+						metadata.posters[image_url] = Proxy.Media(GetApiData(image_url))
+					elif image['coverType'] == "banner":
+						metadata.banners[image_url] = Proxy.Media(GetApiData(image_url))
 
 			metadata.art.validate_keys(valid_names)
 			metadata.posters.validate_keys(valid_names)
