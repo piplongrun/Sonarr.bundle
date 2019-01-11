@@ -83,44 +83,47 @@ class SonarrAgent(Agent.TV_Shows):
 
 		for series in json_series:
 
-			if 'tvdbId' not in series or str(series['tvdbId']) != metadata.id:
+			if str(series['tvdbId']) != metadata.id:
 				continue
 
 			# For now
-			if 'seriesType' not in series or series['seriesType'] != "standard":
+			if series['seriesType'] != "standard":
 				continue
 
 			# Start adding metadata
-			metadata.title = series['title'] if 'title' in series else None
-			metadata.originally_available_at = Datetime.ParseDate(series['firstAired']).date() if 'firstAired' in series else None
-			metadata.summary = series['overview'] if 'overview' in series else None
-			metadata.duration = series['runtime'] * 60 * 1000  if 'runtime' in series else None
-			metadata.studio = series['network'] if 'network' in series else None
+			metadata.title = series['title']
+			metadata.originally_available_at = Datetime.ParseDate(series['firstAired']).date()
+			metadata.summary = series['overview']
+			metadata.duration = series['runtime'] * 60 * 1000
+			metadata.studio = series['network']
 			metadata.content_rating = series['certification'] if 'certification' in series else None
 
 			metadata.genres.clear()
-			if 'genres' in series:
-				for genre in series['genres']:
-					metadata.genres.add(genre)
+			for genre in series['genres']:
+				metadata.genres.add(genre)
 
 			valid_names = list()
 
-			if 'images' in series:
-				for image in series['images']:
+			for image in series['images']:
 
-					image_url = "{}/api/MediaCover/{}".format(Prefs['sonarr_url'].rstrip('/'), image['url'].split('/MediaCover/')[-1])
-					valid_names.append(image_url)
+				image_url = "{}/api/MediaCover/{}".format(Prefs['sonarr_url'].rstrip('/'), image['url'].split('/MediaCover/')[-1])
+				valid_names.append(image_url)
 
-					if image['coverType'] == "fanart":
-						metadata.art[image_url] = Proxy.Media(GetApiData(image_url))
-					elif image['coverType'] == "poster":
-						metadata.posters[image_url] = Proxy.Media(GetApiData(image_url))
-					elif image['coverType'] == "banner":
-						metadata.banners[image_url] = Proxy.Media(GetApiData(image_url))
+				if image['coverType'] == "fanart":
+					metadata.art[image_url] = Proxy.Media(GetApiData(image_url))
+				elif image['coverType'] == "poster":
+					metadata.posters[image_url] = Proxy.Media(GetApiData(image_url))
+				elif image['coverType'] == "banner":
+					metadata.banners[image_url] = Proxy.Media(GetApiData(image_url))
 
 			metadata.art.validate_keys(valid_names)
 			metadata.posters.validate_keys(valid_names)
 			metadata.banners.validate_keys(valid_names)
+
+			# Add show to 'Ended' collection if status is 'ended'
+			metadata.collections.clear()
+			if series['status'] == "ended" and Prefs['sonarr_ended_collection'] and Prefs['sonarr_ended_collection_name'] != "":
+				metadata.collections.add(Prefs['sonarr_ended_collection_name'])
 
 			# Add available episode data
 			sonarr_episodes = EPISODES_URL.format(Prefs['sonarr_url'].rstrip('/'), series['id'])
